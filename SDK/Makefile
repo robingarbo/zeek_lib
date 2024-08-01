@@ -13,15 +13,19 @@ INCLUDE_DIRS := $(BUILD)			\
 		$(BUILD)/auxil/spicy/include \
 		$(BUILD)/src \
 		$(SRC) \
-		$(AUXIL)/broker/include \
+		$(AUXIL)/broker/libbroker \
 		$(SRC)/analyzer/protocol/tcp \
 
 # Options de compilation incluant les répertoires d'en-tête
-CXXFLAGS += -Wall -Wno-unused -funsigned-char -O2 -pthread -std=c++17  $(addprefix -I,$(INCLUDE_DIRS))
+CXXFLAGS += -Wall -Wno-unused -funsigned-char -O2 -pthread -std=c++17  $(addprefix -I,$(INCLUDE_DIRS)) 
+
+CXX_DEFINES = -DDOCTEST_CONFIG_IMPLEMENT_WITH_MAIN -DDOCTEST_CONFIG_SUPER_FAST_ASSERTS  -DFIBER_ASM_CHECK_ALIGNMENT=1 -DFIBER_SHARED=1
+
+C_FLAGS = -flto=auto -fno-fat-lto-objects
 
 # Règle pour compiler le programme principal
-mon_programme: main.cc libparaglob.a libcares.a libstatic.a
-	g++ $(CXXFLAGS) -o mon_programme main.cc -L. -lstatic -lcares -lparaglob -lkqueue \
+my_zeek: main.cc ../build/auxil/paraglob/src/libparaglob.a ../build/auxil/c-ares/lib/libcares.a ../build/libzeek_lib.a ../build/auxil/spicy/lib/libhilti.so
+	g++ -g  $(CXXFLAGS) $(CXX_DEFINES) $(C_FLAGS) -o my_zeek main.cc -L. -lzeek_lib -lcares -lparaglob -lkqueue \
 	-lhilti -lspicy -lbroker -lbinpac -lpthread -lssl -lcrypto -ldl -lz -lgcc -lc -lrt -lpcap
 
 
